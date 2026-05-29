@@ -1,0 +1,20 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Assembled app bundle output
+build/
+
+# Xcode
+*.xcodeproj
+xcuserdata/
+DerivedData/
+*.xcuserstate
+
+# macOS
+.DS_Store
+
+# Process / tooling artifacts (not part of the app)
+.iter/
+.claude/
