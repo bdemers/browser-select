@@ -1,8 +1,8 @@
 // Generates BrowserSelect's app icon as an .icns, drawn from scratch with CoreGraphics.
 //
-// Motif: a single "link" (trunk node, bottom) branching up to three browser nodes —
-// representing one URL being routed to one of several browsers. Original artwork; no
-// third-party or SF Symbol assets, so it carries no licensing constraints.
+// Motif ("mini picker"): the icon is a tiny version of the app itself — a small browser
+// list on a card, with one row highlighted (selected) like the real picker. Original
+// artwork; no third-party or SF Symbol assets, so it carries no licensing constraints.
 //
 // Usage: swift scripts/make-icon.swift <output.iconset-dir>
 // Then:  iconutil -c icns <output.iconset-dir> -o AppBundle/AppIcon.icns
@@ -25,74 +25,78 @@ func renderPNG(size: Int) -> Data {
     let nsctx = NSGraphicsContext(bitmapImageRep: rep)!
     NSGraphicsContext.current = nsctx
     let cg = nsctx.cgContext
+    let cs = CGColorSpaceCreateDeviceRGB()
+    func color(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat, _ a: CGFloat = 1) -> CGColor {
+        CGColor(colorSpace: cs, components: [r, g, b, a])!
+    }
 
     // macOS app icons leave a transparent margin around the rounded-rect body.
     let margin = s * 0.085
     let inner = s - 2 * margin
-    let body = CGRect(x: margin, y: margin, width: inner, height: inner)
-    let radius = inner * 0.2237 // approximates the macOS squircle corner
 
-    // Map normalized coords (0..1 within the body, y-up) to canvas points.
-    func p(_ nx: CGFloat, _ ny: CGFloat) -> CGPoint {
-        CGPoint(x: margin + nx * inner, y: margin + ny * inner)
+    /// Rect from normalized body coords (0..1, y-up: `b`=bottom, `t`=top).
+    func rect(_ l: CGFloat, _ b: CGFloat, _ r: CGFloat, _ t: CGFloat) -> CGRect {
+        CGRect(x: margin + l * inner, y: margin + b * inner,
+               width: (r - l) * inner, height: (t - b) * inner)
+    }
+    func rounded(_ rect: CGRect, _ radius: CGFloat) -> CGPath {
+        CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil)
     }
 
-    // --- Background: clipped rounded rect with a vertical gradient ---
-    let bg = CGPath(roundedRect: body, cornerWidth: radius, cornerHeight: radius, transform: nil)
+    // --- Background: clipped squircle with a vertical gradient (indigo → blue) ---
+    let body = CGRect(x: margin, y: margin, width: inner, height: inner)
     cg.saveGState()
-    cg.addPath(bg)
+    cg.addPath(rounded(body, inner * 0.2237))
     cg.clip()
-    let cs = CGColorSpaceCreateDeviceRGB()
-    let gradient = CGGradient(
-        colorsSpace: cs,
-        colors: [
-            CGColor(colorSpace: cs, components: [0.36, 0.30, 0.96, 1.0])!, // indigo (top)
-            CGColor(colorSpace: cs, components: [0.16, 0.52, 0.98, 1.0])!, // blue (bottom)
-        ] as CFArray,
-        locations: [0.0, 1.0])!
-    cg.drawLinearGradient(gradient, start: p(0.5, 1.0), end: p(0.5, 0.0), options: [])
+    let bg = CGGradient(colorsSpace: cs, colors: [
+        color(0.36, 0.30, 0.96), // top
+        color(0.16, 0.52, 0.98), // bottom
+    ] as CFArray, locations: [0, 1])!
+    cg.drawLinearGradient(bg, start: CGPoint(x: 0, y: s), end: CGPoint(x: 0, y: 0), options: [])
     cg.restoreGState()
 
-    // --- Branch geometry ---
-    let trunk = p(0.5, 0.20)
-    let leftN = p(0.24, 0.74)
-    let midN  = p(0.5, 0.82)
-    let rightN = p(0.76, 0.74)
+    // --- Picker card (light, with a soft drop shadow) ---
+    let card = rect(0.13, 0.15, 0.87, 0.85)
+    cg.saveGState()
+    cg.setShadow(offset: CGSize(width: 0, height: -inner * 0.012),
+                 blur: inner * 0.045, color: color(0, 0, 0, 0.28))
+    cg.addPath(rounded(card, inner * 0.055))
+    cg.setFillColor(color(0.97, 0.97, 0.98))
+    cg.fillPath()
+    cg.restoreGState()
 
-    let lineW = inner * 0.055
-    cg.setLineCap(.round)
-    cg.setLineJoin(.round)
-    cg.setStrokeColor(CGColor(colorSpace: cs, components: [1, 1, 1, 0.95])!)
-    cg.setLineWidth(lineW)
-    for end in [leftN, midN, rightN] {
-        cg.move(to: trunk)
-        // gentle curve from trunk up to each node
-        let ctrl = CGPoint(x: (trunk.x + end.x) / 2, y: trunk.y + (end.y - trunk.y) * 0.65)
-        cg.addQuadCurve(to: end, control: ctrl)
-    }
-    cg.strokePath()
-
-    // --- Trunk node (the incoming link): solid white dot ---
-    let trunkR = inner * 0.055
-    cg.setFillColor(CGColor(colorSpace: cs, components: [1, 1, 1, 1])!)
-    cg.fillEllipse(in: CGRect(x: trunk.x - trunkR, y: trunk.y - trunkR, width: 2*trunkR, height: 2*trunkR))
-
-    // --- Browser nodes: colored discs with a white ring ---
-    let nodeR = inner * 0.115
-    let ring = inner * 0.022
-    let colors: [[CGFloat]] = [
-        [0.92, 0.26, 0.21, 1.0], // red
-        [0.20, 0.66, 0.33, 1.0], // green
-        [0.26, 0.52, 0.96, 1.0], // blue
+    // --- Three rows; the middle one is "selected" (accent fill) ---
+    // (top, bottom, browser-dot color, highlighted)
+    let rows: [(CGFloat, CGFloat, CGColor, Bool)] = [
+        (0.780, 0.635, color(0.92, 0.26, 0.21), false), // red
+        (0.575, 0.430, color(1.00, 1.00, 1.00), true),  // selected (white dot on accent)
+        (0.370, 0.225, color(0.20, 0.66, 0.33), false), // green
     ]
-    for (i, center) in [leftN, midN, rightN].enumerated() {
-        // white ring (slightly larger filled circle behind)
-        let outerR = nodeR + ring
-        cg.setFillColor(CGColor(colorSpace: cs, components: [1, 1, 1, 1])!)
-        cg.fillEllipse(in: CGRect(x: center.x - outerR, y: center.y - outerR, width: 2*outerR, height: 2*outerR))
-        // colored disc
-        cg.setFillColor(CGColor(colorSpace: cs, components: colors[i])!)
-        cg.fillEllipse(in: CGRect(x: center.x - nodeR, y: center.y - nodeR, width: 2*nodeR, height: 2*nodeR))
+    let rowL: CGFloat = 0.18, rowR: CGFloat = 0.82
+    let accent = color(0.20, 0.52, 0.96)
+
+    for (top, bottom, dot, highlighted) in rows {
+        let mid = (top + bottom) / 2
+
+        if highlighted {
+            cg.addPath(rounded(rect(0.155, bottom - 0.020, 0.845, top + 0.020), inner * 0.030))
+            cg.setFillColor(accent)
+            cg.fillPath()
+        }
+
+        // Browser swatch dot.
+        let dotR = inner * 0.040
+        let dotX = margin + (rowL + 0.045) * inner
+        let dotY = margin + mid * inner
+        cg.setFillColor(dot)
+        cg.fillEllipse(in: CGRect(x: dotX - dotR, y: dotY - dotR, width: 2 * dotR, height: 2 * dotR))
+
+        // "Name" bar (a pill standing in for the browser name text).
+        let barH = inner * 0.050
+        let bar = rect(rowL + 0.11, mid - barH / inner / 2, rowR - 0.02, mid + barH / inner / 2)
+        cg.addPath(rounded(bar, barH / 2))
+        cg.setFillColor(highlighted ? color(1, 1, 1, 0.95) : color(0.60, 0.62, 0.70))
+        cg.fillPath()
     }
 
     NSGraphicsContext.restoreGraphicsState()
