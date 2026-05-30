@@ -36,8 +36,9 @@ func renderPNG(size: Int) -> Data {
 
     /// Rect from normalized body coords (0..1, y-up: `b`=bottom, `t`=top).
     func rect(_ l: CGFloat, _ b: CGFloat, _ r: CGFloat, _ t: CGFloat) -> CGRect {
-        CGRect(x: margin + l * inner, y: margin + b * inner,
-               width: (r - l) * inner, height: (t - b) * inner)
+        CGRect(
+            x: margin + l * inner, y: margin + b * inner,
+            width: (r - l) * inner, height: (t - b) * inner)
     }
     func rounded(_ rect: CGRect, _ radius: CGFloat) -> CGPath {
         CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil)
@@ -48,18 +49,21 @@ func renderPNG(size: Int) -> Data {
     cg.saveGState()
     cg.addPath(rounded(body, inner * 0.2237))
     cg.clip()
-    let bg = CGGradient(colorsSpace: cs, colors: [
-        color(0.36, 0.30, 0.96), // top
-        color(0.16, 0.52, 0.98), // bottom
-    ] as CFArray, locations: [0, 1])!
+    let bg = CGGradient(
+        colorsSpace: cs,
+        colors: [
+            color(0.36, 0.30, 0.96),  // top
+            color(0.16, 0.52, 0.98),  // bottom
+        ] as CFArray, locations: [0, 1])!
     cg.drawLinearGradient(bg, start: CGPoint(x: 0, y: s), end: CGPoint(x: 0, y: 0), options: [])
     cg.restoreGState()
 
     // --- Picker card (light, with a soft drop shadow) ---
     let card = rect(0.13, 0.15, 0.87, 0.85)
     cg.saveGState()
-    cg.setShadow(offset: CGSize(width: 0, height: -inner * 0.012),
-                 blur: inner * 0.045, color: color(0, 0, 0, 0.28))
+    cg.setShadow(
+        offset: CGSize(width: 0, height: -inner * 0.012),
+        blur: inner * 0.045, color: color(0, 0, 0, 0.28))
     cg.addPath(rounded(card, inner * 0.055))
     cg.setFillColor(color(0.97, 0.97, 0.98))
     cg.fillPath()
@@ -68,9 +72,9 @@ func renderPNG(size: Int) -> Data {
     // --- Three rows; the middle one is "selected" (accent fill) ---
     // (top, bottom, browser-dot color, highlighted)
     let rows: [(CGFloat, CGFloat, CGColor, Bool)] = [
-        (0.780, 0.635, color(0.92, 0.26, 0.21), false), // red
+        (0.780, 0.635, color(0.92, 0.26, 0.21), false),  // red
         (0.575, 0.430, color(1.00, 1.00, 1.00), true),  // selected (white dot on accent)
-        (0.370, 0.225, color(0.20, 0.66, 0.33), false), // green
+        (0.370, 0.225, color(0.20, 0.66, 0.33), false),  // green
     ]
     let rowL: CGFloat = 0.18, rowR: CGFloat = 0.82
     let accent = color(0.20, 0.52, 0.96)

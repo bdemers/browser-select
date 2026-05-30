@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import BrowserSelectKit
 
 final class BrowserEnumeratorTests: XCTestCase {
@@ -19,7 +20,7 @@ final class BrowserEnumeratorTests: XCTestCase {
         let result = enumerator.filter(candidates: [
             browser("Safari", "com.apple.Safari"),
             browser("BrowserSelect", selfID),
-            browser("Firefox", "org.mozilla.firefox")
+            browser("Firefox", "org.mozilla.firefox"),
         ])
 
         XCTAssertFalse(
@@ -36,11 +37,12 @@ final class BrowserEnumeratorTests: XCTestCase {
         let result = enumerator.filter(candidates: [
             browser("Chrome", "com.google.Chrome"),
             browser("Chrome (copy)", "com.google.Chrome"),
-            browser("Safari", "com.apple.Safari")
+            browser("Safari", "com.apple.Safari"),
         ])
 
-        XCTAssertEqual(result.map(\.bundleID).sorted(),
-                       ["com.apple.Safari", "com.google.Chrome"])
+        XCTAssertEqual(
+            result.map(\.bundleID).sorted(),
+            ["com.apple.Safari", "com.google.Chrome"])
     }
 
     /// Output is sorted case-insensitively by display name for a stable picker layout.
@@ -50,7 +52,7 @@ final class BrowserEnumeratorTests: XCTestCase {
         let result = enumerator.filter(candidates: [
             browser("safari", "com.apple.Safari"),
             browser("Arc", "company.thebrowser.Browser"),
-            browser("Firefox", "org.mozilla.firefox")
+            browser("Firefox", "org.mozilla.firefox"),
         ])
 
         XCTAssertEqual(result.map(\.name), ["Arc", "Firefox", "safari"])
@@ -78,11 +80,12 @@ final class BrowserEnumeratorTests: XCTestCase {
             browser("Safari", "com.apple.Safari"),
             browser("iTerm", "com.googlecode.iterm2"),
             browser("Terminal", "com.apple.Terminal"),
-            browser("Firefox", "org.mozilla.firefox")
+            browser("Firefox", "org.mozilla.firefox"),
         ])
 
-        XCTAssertEqual(result.map(\.bundleID).sorted(),
-                       ["com.apple.Safari", "org.mozilla.firefox"])
+        XCTAssertEqual(
+            result.map(\.bundleID).sorted(),
+            ["com.apple.Safari", "org.mozilla.firefox"])
     }
 
     /// The denylist is injectable: a custom set filters different bundle IDs.
@@ -94,7 +97,7 @@ final class BrowserEnumeratorTests: XCTestCase {
 
         let result = enumerator.filter(candidates: [
             browser("Safari", "com.apple.Safari"),
-            browser("iTerm", "com.googlecode.iterm2") // not denylisted under the custom set
+            browser("iTerm", "com.googlecode.iterm2"),  // not denylisted under the custom set
         ])
 
         XCTAssertEqual(result.map(\.bundleID), ["com.googlecode.iterm2"])

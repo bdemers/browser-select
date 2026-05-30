@@ -115,18 +115,18 @@ private struct KeyHandling: NSViewRepresentable {
         override var acceptsFirstResponder: Bool { true }
 
         override func keyDown(with event: NSEvent) {
-            guard let model else { return super.keyDown(with: event); }
+            guard let model else { return super.keyDown(with: event) }
             let count = model.browsers.count
             switch event.keyCode {
-            case 53: // Escape
+            case 53:  // Escape
                 model.cancel()
-            case 36, 76: // Return / keypad Enter
+            case 36, 76:  // Return / keypad Enter
                 if count > 0, model.selectedIndex < count {
                     model.open(model.browsers[model.selectedIndex])
                 }
-            case 123, 126: // Left / Up
+            case 123, 126:  // Left / Up
                 if count > 0 { model.selectedIndex = (model.selectedIndex - 1 + count) % count }
-            case 124, 125: // Right / Down
+            case 124, 125:  // Right / Down
                 if count > 0 { model.selectedIndex = (model.selectedIndex + 1) % count }
             default:
                 super.keyDown(with: event)

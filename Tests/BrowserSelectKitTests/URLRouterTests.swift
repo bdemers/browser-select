@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import BrowserSelectKit
 
 final class URLRouterTests: XCTestCase {
@@ -24,14 +25,14 @@ final class URLRouterTests: XCTestCase {
 
     func testMalformedAndDisallowedURLsRejected() {
         let bad = [
-            "",                                   // empty
-            "   ",                                // whitespace only
-            "not a url",                          // no scheme/host
-            "file:///etc/passwd",                 // disallowed scheme
-            "javascript:alert(1)",                // disallowed scheme
-            "ftp://example.com",                  // disallowed scheme
-            "http://",                            // no host
-            "https://"                            // no host
+            "",  // empty
+            "   ",  // whitespace only
+            "not a url",  // no scheme/host
+            "file:///etc/passwd",  // disallowed scheme
+            "javascript:alert(1)",  // disallowed scheme
+            "ftp://example.com",  // disallowed scheme
+            "http://",  // no host
+            "https://",  // no host
         ]
         for input in bad {
             XCTAssertNil(URLRouter.sanitize(input), "Expected nil for input: \(input)")
@@ -48,8 +49,9 @@ final class URLRouterTests: XCTestCase {
         XCTAssertEqual(result?.path, "/Path/To")
         XCTAssertEqual(result?.query, "Query=Value")
         XCTAssertEqual(result?.fragment, "Frag")
-        XCTAssertEqual(result?.absoluteString,
-                       "https://example.com/Path/To?Query=Value#Frag")
+        XCTAssertEqual(
+            result?.absoluteString,
+            "https://example.com/Path/To?Query=Value#Frag")
     }
 
     /// Leading/trailing whitespace is trimmed before parsing.

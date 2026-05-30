@@ -166,3 +166,14 @@ The project is two SPM targets:
 
 Run `swift test` before sending changes. UI changes need the manual verification recipe
 above since they can't be exercised headlessly.
+
+### Linting & CI
+
+- `make lint` — runs Apple's **swift-format** (style, config in `.swift-format`) and
+  **SwiftLint** (idiom/correctness, config in `.swiftlint.yml`). Both must pass clean.
+- `make format` — auto-formats sources in place with swift-format.
+- SwiftLint is the only extra dev tool: `brew install swiftlint`. swift-format ships with
+  the Swift 6 toolchain. The app itself has **no third-party dependencies**.
+- CI (`.github/workflows/ci.yml`) runs build, tests, a strict-concurrency build, and both
+  linters on every push/PR. **CodeQL** security scanning runs via
+  `.github/workflows/codeql.yml` (results in the repo's Security tab).

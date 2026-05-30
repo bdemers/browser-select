@@ -58,7 +58,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func handleGetURL(_ event: NSAppleEventDescriptor, withReplyEvent reply: NSAppleEventDescriptor) {
         let start = DispatchTime.now()
         guard let raw = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue,
-              let url = URLRouter.sanitize(raw) else {
+            let url = URLRouter.sanitize(raw)
+        else {
             return
         }
         model.pendingURL = url
@@ -69,7 +70,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // confirmed on the user's own machine (see README "Manual Verification"). Scheme
         // only — never the full URL — to avoid logging secrets.
         let elapsedMs = Double(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds) / 1_000_000
-        log.info("Picker presented in \(elapsedMs, format: .fixed(precision: 1), privacy: .public) ms for scheme \(url.scheme ?? "?", privacy: .public)")
+        log.info(
+            // swiftlint:disable:next line_length
+            "Picker presented in \(elapsedMs, format: .fixed(precision: 1), privacy: .public) ms for scheme \(url.scheme ?? "?", privacy: .public)"
+        )
     }
 
     /// Launches the sanitized URL in the chosen browser, then hides the picker.
@@ -107,6 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 let scheme = url.scheme ?? "?"
                 let host = url.host ?? "?"
                 self?.log.error(
+                    // swiftlint:disable:next line_length
                     "Failed to open \(scheme, privacy: .public)://\(host, privacy: .private) in \(browser.name, privacy: .public): \(error.localizedDescription, privacy: .public)"
                 )
             }
@@ -123,7 +128,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// array (no shell), so there is no injection surface.
     private func launchWithArguments(_ url: URL, in browser: DisplayBrowser) {
         guard let bundle = Bundle(url: browser.url),
-              let exeName = bundle.object(forInfoDictionaryKey: "CFBundleExecutable") as? String else {
+            let exeName = bundle.object(forInfoDictionaryKey: "CFBundleExecutable") as? String
+        else {
             // Fall back to a normal open if we can't locate the executable.
             launchViaWorkspace(url, in: browser)
             return
@@ -138,7 +144,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         do {
             try process.run()
         } catch {
-            log.error("Profile launch failed for \(browser.name, privacy: .public): \(error.localizedDescription, privacy: .public); falling back to default open")
+            log.error(
+                // swiftlint:disable:next line_length
+                "Profile launch failed for \(browser.name, privacy: .public): \(error.localizedDescription, privacy: .public); falling back to default open"
+            )
             launchViaWorkspace(url, in: browser)
         }
     }

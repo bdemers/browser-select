@@ -1,0 +1,44 @@
+# SwiftLint configuration for BrowserSelect.
+# Kept intentionally small for a small, dependency-free app.
+
+included:
+  - Sources
+  - Tests
+# scripts/ (the make-icon.swift build tool) is intentionally not linted — it's a
+# standalone CoreGraphics generator, not shipped app/library code.
+
+excluded:
+  - .build
+  - build
+  - scripts
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - sorted_first_last
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+
+line_length:
+  warning: 110
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+# Align with swift-format, which adds trailing commas to multi-line collections.
+trailing_comma:
+  mandatory_comma: true
+
+# The CoreGraphics icon math and small helpers use short, conventional names
+# (s, cg, cs, l, b, r, t, p). Don't flag those.
+identifier_name:
+  min_length:
+    warning: 1
+  excluded: [id, url, cg, cs]
+
+# Test methods are intentionally long and descriptive.
+type_body_length:
+  warning: 400
+file_length:
+  warning: 500

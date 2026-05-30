@@ -70,7 +70,8 @@ struct BrowserDiscovery {
 
         for appURL in appURLs {
             guard let bundle = Bundle(url: appURL),
-                  let bundleID = bundle.bundleIdentifier else { continue }
+                let bundleID = bundle.bundleIdentifier
+            else { continue }
 
             let name = Self.displayName(for: appURL, bundle: bundle)
             candidates.append(Browser(url: appURL, bundleID: bundleID, name: name))

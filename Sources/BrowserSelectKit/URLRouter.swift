@@ -25,7 +25,8 @@ public enum URLRouter {
         guard var components = URLComponents(string: trimmed) else { return nil }
 
         guard let scheme = components.scheme?.lowercased(),
-              allowedSchemes.contains(scheme) else {
+            allowedSchemes.contains(scheme)
+        else {
             return nil
         }
 

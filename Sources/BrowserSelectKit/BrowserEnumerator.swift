@@ -21,8 +21,8 @@ public struct BrowserEnumerator {
     /// picker. macOS provides no API that distinguishes them, so we filter by a curated
     /// denylist. Extend this set if other non-browsers leak in.
     public static let defaultDenylist: Set<String> = [
-        "com.googlecode.iterm2", // iTerm
-        "com.apple.Terminal",    // Terminal
+        "com.googlecode.iterm2",  // iTerm
+        "com.apple.Terminal",  // Terminal
     ]
 
     /// The bundle identifier to exclude from results (this app's own ID).

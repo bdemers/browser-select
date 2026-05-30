@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build & Test
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift version
+        run: swift --version
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test
+      - name: Strict-concurrency build (data-race check)
+        run: swift build -Xswiftc -strict-concurrency=complete
+
+  lint:
+    name: Lint
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: swift-format (style)
+        run: swift format lint --strict --recursive --configuration .swift-format Sources Tests scripts
+      - name: Install SwiftLint
+        run: brew install swiftlint
+      - name: SwiftLint (idiom/correctness)
+        run: swiftlint lint --strict

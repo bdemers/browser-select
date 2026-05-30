@@ -22,7 +22,7 @@ RELEASE_BIN = $(shell swift build -c release --show-bin-path)/$(EXECUTABLE)
 ARM64_BIN   = $(shell swift build -c release --arch arm64 --show-bin-path)/$(EXECUTABLE)
 X86_64_BIN  = $(shell swift build -c release --arch x86_64 --show-bin-path)/$(EXECUTABLE)
 
-.PHONY: all bundle bundle-universal build test install uninstall icon clean
+.PHONY: all bundle bundle-universal build test lint format install uninstall icon clean
 
 all: bundle
 
@@ -33,6 +33,18 @@ build:
 # Run the headlessly-testable kit tests.
 test:
 	swift test --filter BrowserSelectKitTests
+
+# Lint: Apple's swift-format (style) + SwiftLint (idiom/correctness). Read-only; fails
+# on any finding (CI runs the same). `swift format` ships with the toolchain; SwiftLint
+# is installed separately (`brew install swiftlint`).
+lint:
+	swift format lint --strict --recursive --configuration .swift-format Sources Tests scripts
+	swiftlint lint --strict
+
+# Auto-format sources in place with swift-format (does not run SwiftLint autocorrect).
+format:
+	swift format --in-place --recursive --configuration .swift-format Sources Tests scripts
+	@echo "Formatted. Review changes with: git diff"
 
 # Build a HOST-ARCH release binary, assemble build/BrowserSelect.app from it plus
 # AppBundle/Info.plist, then apply an ad-hoc signature so it launches locally.
