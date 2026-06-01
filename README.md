@@ -4,6 +4,8 @@ A tiny native macOS app that registers as the system handler for `http`/`https`
 URLs, shows a lightweight picker of your installed browsers when you open a link,
 and forwards the URL to whichever browser you choose.
 
+![BrowserSelect Picker UI](browser_picker_screenshot.png)
+
 Useful when you want per-link control over which browser opens — work vs. personal,
 Chromium vs. WebKit, a profile-specific browser, etc.
 
